@@ -22,11 +22,13 @@ public:
     std::unique_ptr<QuadTreeNode> This(new QuadTreeNode);
     This->isLeaf = 0;
     This->children[0] = nullptr; This->children[1] = nullptr; This->children[2] = nullptr; This->children[3] = nullptr; //set node to null
-    for(auto &p : particles) {
+    for(int i = 0; i < particles.size(); i++) {
+      auto p = particles[i];
       if(p.position.x>=bmin.x && p.position.x<=bmax.x && p.position.y>=bmin.y && p.position.y<=bmax.y){
         This->particles.push_back(p);
-        std::swap(p,particles.back());
+        std::swap(particles[i],particles.back());
         particles.pop_back();
+        i--;
       }
     }
     if(This->particles.size() > QuadTreeLeafSize){
@@ -36,9 +38,9 @@ public:
         //#pragma omp section
         This->children[0] = buildQuadTree(This->particles,bmin,bmid);
         //#pragma omp section
-        This->children[1] = buildQuadTree(This->particles,(Vec2)(bmid.x,bmin.y),(Vec2)(bmax.x,bmid.y));
+        This->children[1] = buildQuadTree(This->particles,Vec2(bmid.x,bmin.y),Vec2(bmax.x,bmid.y));
         //#pragma omp section
-        This->children[2] = buildQuadTree(This->particles,(Vec2)(bmin.x,bmid.y),(Vec2)(bmid.x,bmax.y));
+        This->children[2] = buildQuadTree(This->particles,Vec2(bmin.x,bmid.y),Vec2(bmid.x,bmax.y));
         //#pragma omp section
         This->children[3] = buildQuadTree(This->particles,bmid,bmax);
       }
